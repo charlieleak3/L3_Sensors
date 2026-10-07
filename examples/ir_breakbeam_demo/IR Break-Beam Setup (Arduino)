@@ -1,0 +1,24 @@
+#include <sensors/ir_breakbeam.h>
+
+IRBreakBeamChannel beamSensor;
+
+void onBeamTrigger(uint8_t channelId, uint32_t durationUs) {
+    // Handle beam interrupt event
+}
+
+void setup() {
+    IRChannelConfig config;
+    config.channelId = 1;
+    config.gpioPin = 2;
+    config.debounceMicros = 15000;
+    config.logic = BeamLogic::ACTIVE_LOW;
+    config.edge = TriggerEdge::ON_EXIT;
+    config.useInternalPullup = true;
+
+    beamSensor.begin(config);
+    beamSensor.setTriggerCallback(onBeamTrigger);
+}
+
+void loop() {
+    beamSensor.update();
+}

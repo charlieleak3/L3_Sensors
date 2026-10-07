@@ -1,38 +1,95 @@
-#include <iostream>
-#include "UltrasonicRanger.hpp"
+/**
+ * @file ir_breakbeam.cpp
+ * @project Universal Embedded Hardware Drivers (L3_Sensors)
+ * @brief Implementation for decoupled optical break-beam driver channels.
+ */
 
-// Platform-specific wrapper implementations (e.g., Arduino / STM32 HAL / ESP-IDF)
-void hal_write_trig_pin(bool level) {
-    // Platform GPIO write implementation
-}
+#include <sensors/ir_breakbeam.h>
 
-uint32_t hal_read_echo_pulse(uint32_t timeoutUs) {
-    // Platform microsecond pulse duration measurement
-    return 1166; // Simulated echo time (~20 cm distance)
-}
+IRBreakBeamChannel::IRBreakBeamChannel()
+    : m_id(0),
+      m_pin(0),
+      m_debounceUs(150000),
+      m_logic(BeamLogic::ACTIVE_HIGH),
+      m_edge(TriggerEdge::ON_EXIT),
+      m_rawState(false),
+      m_isBroken(false),
+      m_lastStateChangeUs(0),
+      m_beamBreakStartUs(0),
+      m_lastTriggerUs(0),
+      m_lastDurationUs(0),
+      m_count(0),
+      m_onTriggerCallback(nullptr) {}
 
-void hal_delay_microseconds(uint32_t us) {
-    // Platform microsecond delay implementation
-}
+void IRBreakBeamChannel::begin(const IRChannelConfig& config) {
+    m_id = config.channelId;
+    m_pin = config.gpioPin;
+    m_debounceUs = config.debounceMicros;
+    m_logic = config.logic;
+    m_edge = config.edge;
 
-int main() {
-    // Instantiate using universal class or aliased sensor name
-    Hardware::UltrasonicRanger distanceSensor(
-        hal_write_trig_pin,
-        hal_read_echo_pulse,
-        hal_delay_microseconds
-    );
-
-    // Dynamic temperature compensation setup
-    distanceSensor.setTemperature(25.0f); // Set ambient temperature to 25°C
-
-    float distance = distanceSensor.getDistanceCm();
-    
-    if (distance >= 0.0f) {
-        std::cout << "Target Distance: " << distance << " cm" << std::endl;
+    if (config.useInternalPullup) {
+        pinMode(m_pin, INPUT_PULLUP);
     } else {
-        std::cout << "Measurement Out of Range / Timeout" << std::endl;
+        pinMode(m_pin, INPUT);
     }
 
-    return 0;
+    // Read initial pin state
+    bool initialPinLevel = (digitalRead(m_pin) == HIGH);
+    m_rawState = initialPinLevel;
+    m_isBroken = evaluateBrokenState(initialPinLevel);
+    m_lastStateChangeUs = micros();
+    m_beamBreakStartUs = m_isBroken ? m_lastStateChangeUs : 0;
+}
+
+bool IRBreakBeamChannel::evaluateBrokenState(bool rawPinLevel) const noexcept {
+    if (m_logic == BeamLogic::ACTIVE_LOW) {
+        return !rawPinLevel; // LOW pin signal indicates beam is broken
+    }
+    return rawPinLevel;      // HIGH pin signal indicates beam is broken
+}
+
+void IRBreakBeamChannel::update() {
+    uint32_t nowUs = micros();
+    bool currentPinLevel = (digitalRead(m_pin) == HIGH);
+
+    // Filter out signal chatter: restart timer on raw state transitions
+    if (currentPinLevel != m_rawState) {
+        m_rawState = currentPinLevel;
+        m_lastStateChangeUs = nowUs;
+        return;
+    }
+
+    // Check if stable state duration exceeds debounce window
+    if ((nowUs - m_lastStateChangeUs) >= m_debounceUs) {
+        bool debouncedBrokenState = evaluateBrokenState(currentPinLevel);
+
+        // State transition detected after debouncing
+        if (debouncedBrokenState != m_isBroken) {
+            m_isBroken = debouncedBrokenState;
+            m_lastTriggerUs = nowUs;
+
+            if (m_isBroken) {
+                // Transition: Beam Entered (Unbroken -> Broken)
+                m_beamBreakStartUs = nowUs;
+
+                if (m_edge == TriggerEdge::ON_ENTER || m_edge == TriggerEdge::BOTH) {
+                    m_count++;
+                    if (m_onTriggerCallback) {
+                        m_onTriggerCallback(m_id, 0);
+                    }
+                }
+            } else {
+                // Transition: Beam Exited (Broken -> Unbroken)
+                m_lastDurationUs = nowUs - m_beamBreakStartUs;
+
+                if (m_edge == TriggerEdge::ON_EXIT || m_edge == TriggerEdge::BOTH) {
+                    m_count++;
+                    if (m_onTriggerCallback) {
+                        m_onTriggerCallback(m_id, m_lastDurationUs);
+                    }
+                }
+            }
+        }
+    }
 }

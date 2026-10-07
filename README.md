@@ -1,31 +1,38 @@
-# L3_Sensors
+# Universal Embedded Hardware Drivers (`L3_Sensors`)
 
-A modular C/C++ driver library and example suite for various hardware sensor types (IR break-beams, ultrasonic distance sensors, optical detectors, and more).
+A modular, cross-platform C++ driver library designed for embedded systems and microcontrollers (Arduino, STM32, ESP32, Bare-Metal). 
 
-This repository organizes sensor code into clean, reusable public interfaces (`.h`) and driver implementations (`.c`/`.cpp`), designed for easy porting across microcontrollers (Arduino, ESP32, STM32) and host systems.
+## Supported Hardware & Modules
+
+### 1. Ultrasonic Range Sensors (`UltrasonicRanger.hpp`)
+Provides abstracted, cross-platform pulse timing drivers for 4-pin and 3-pin ultrasonic distance modules:
+* **HC-SR04**: Standard 4-pin ultrasonic distance module.
+* **HY-SRF05**: 5-pin enhanced replacement module.
+* **JSN-SR04T**: Sealed waterproof ultrasonic sensor (Mode 1 / Pulse mode).
+* **US-100**: Dual-mode ultrasonic range sensor (Pulse mode).
+
+### 2. IR Break-Beam Sensors (`ir_breakbeam.h` / `ir_breakbeam.cpp`)
+Provides non-blocking, debounced edge detection and optical channel monitoring:
+* Active-High and Active-Low logic support.
+* Flexible edge detection (`ON_ENTER`, `ON_EXIT`, `BOTH`).
+* Hardware pull-up configuration and software debouncing.
+* Asynchronous event callbacks with pulse duration measurement.
 
 ---
 
-## 📁 Repository Structure
+## Directory Structure
 
 ```text
-L3_Sensors/
-├── include/                   # Public header files (API definitions)
-│   └── sensors/               # Modular sensor drivers
-│       ├── ir_breakbeam.h
-│       └── ultrasonic_distance.h
-│
-├── src/                       # Sensor driver implementations (.c / .cpp)
-│   ├── ir_breakbeam.c
-│   └── ultrasonic_distance.cpp
-│
-├── examples/                  # Ready-to-run demo application mains
-│   ├── ir_breakbeam_demo/
-│   │   └── main.cpp
-│   └── ultrasonic_demo/
-│       └── main.cpp
-│
-├── tests/                     # Unit test suites
-├── CMakeLists.txt             # Root CMake build configuration
-├── .gitignore                 # Tracked file exclusions
-└── README.md                  # Project overview
+.
+├── include/
+│   └── sensors/
+│       ├── UltrasonicRanger.hpp
+│       └── ir_breakbeam.h
+├── src/
+│   └── ir_breakbeam.cpp
+├── examples/
+│   ├── ultrasonic_example.cpp
+│   └── breakbeam_example.cpp
+├── .gitignore
+├── LICENSE
+└── README.md
