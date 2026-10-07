@@ -1,4 +1,3 @@
-cat << 'EOF' > .gitattributes
 # Auto-detect text files and normalize line endings to LF
 * text=auto eol=lf
 
@@ -13,19 +12,3 @@ cat << 'EOF' > .gitattributes
 *.jpg binary
 *.elf binary
 *.bin binary
-EOFcat << 'EOF' > .gitattributes
-# Auto-detect text files and normalize line endings to LF
-* text=auto eol=lf
-
-# Explicitly mark C/C++ source files
-*.c text eol=lf
-*.cpp text eol=lf
-*.h text eol=lf
-*.md text eol=lf
-
-# Binary files
-*.png binary
-*.jpg binary
-*.elf binary
-*.bin binary
-EOF

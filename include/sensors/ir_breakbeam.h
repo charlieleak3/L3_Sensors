@@ -1,3 +1,9 @@
+/**
+ * @file ir_breakbeam.h
+ * @project Universal Embedded Hardware Drivers (L3_Sensors)
+ * @brief Public interface definitions for IR break-beam optical channel drivers.
+ */
+
 #ifndef SENSORS_IR_BREAKBEAM_H
 #define SENSORS_IR_BREAKBEAM_H
 

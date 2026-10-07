@@ -1,0 +1,9 @@
+C++:
+#include <sensors/ir_breakbeam.h>
+#include <sensors/ultrasonic_distance.h>
+
+-Using CMake
+1. Create and enter a build directory: mkdir build && cd build
+2. Generate build files: cmake ..
+3. Build all modules and demos: make
+
