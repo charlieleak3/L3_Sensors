@@ -13,11 +13,10 @@ L3_Sensors/
 ├── include/                   # Public header files (API definitions)
 │   └── sensors/               # Modular sensor drivers
 │       ├── ir_breakbeam.h
-│       └── ultrasonic_distance.h
+│       └── UltrasonicRanger.hpp
 │
 ├── src/                       # Sensor driver implementations (.c / .cpp)
 │   ├── ir_breakbeam.c
-│   └── ultrasonic_distance.cpp
 │
 ├── examples/                  # Ready-to-run demo application mains
 │   ├── ir_breakbeam_demo/
