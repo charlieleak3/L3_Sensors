@@ -1,0 +1,31 @@
+# L3_Sensors
+
+A modular C/C++ driver library and example suite for various hardware sensor types (IR break-beams, ultrasonic distance sensors, optical detectors, and more).
+
+This repository organizes sensor code into clean, reusable public interfaces (`.h`) and driver implementations (`.c`/`.cpp`), designed for easy porting across microcontrollers (Arduino, ESP32, STM32) and host systems.
+
+---
+
+## 📁 Repository Structure
+
+```text
+L3_Sensors/
+├── include/                   # Public header files (API definitions)
+│   └── sensors/               # Modular sensor drivers
+│       ├── ir_breakbeam.h
+│       └── ultrasonic_distance.h
+│
+├── src/                       # Sensor driver implementations (.c / .cpp)
+│   ├── ir_breakbeam.c
+│   └── ultrasonic_distance.cpp
+│
+├── examples/                  # Ready-to-run demo application mains
+│   ├── ir_breakbeam_demo/
+│   │   └── main.cpp
+│   └── ultrasonic_demo/
+│       └── main.cpp
+│
+├── tests/                     # Unit test suites
+├── CMakeLists.txt             # Root CMake build configuration
+├── .gitignore                 # Tracked file exclusions
+└── README.md                  # Project overview
